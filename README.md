@@ -64,7 +64,6 @@ sudo dtoverlay st7703-gx040hd
 
 ### Reboot and Check
 ```bash
-sudo reboot
 dmesg | grep -i st7703
 dmesg | grep -i dsi
 dmesg | grep -i panel
@@ -90,6 +89,30 @@ dtoverlay=st7703-gx040hd
 To load overlay manually run
 ```bash
 sudo dtoverlay st7703-gx040hd
+```
+
+### X11 Configuration
+
+For X11 desktop environments, create `/etc/X11/xorg.conf.d/99-fbdev.conf`:
+
+```xorg
+Section "Device"
+    Identifier "GX040HD"
+    Driver "fbdev"
+    Option "fbdev" "/dev/fb0"
+    Option "SWCursor" "true"
+EndSection
+
+Section "Screen"
+    Identifier "main"
+    Device "GX040HD"
+    Monitor "GX040HD Monitor"
+EndSection
+
+Section "Monitor"
+    Identifier "GX040HD Monitor"
+    Option "DPMS" "false"
+EndSection
 ```
 
 ## Verification
