@@ -1,0 +1,384 @@
+================================================================================
+ST7703 Initialization Sequence - GX040HD-30MB-A1 Display
+Panel: 4.0" 720x720 IPS LCD (4 Lane MIPI-DSI)
+================================================================================
+
+DISPLAY TIMING PARAMETERS:
+--------------------------------------------------------------------------------
+#define Width   720       // Horizontal active pixels
+#define Height  720       // Vertical active lines
+#define HFP     80        // Horizontal Front Porch
+#define HBP     80        // Horizontal Back Porch
+#define HSA     20        // Horizontal Sync Active
+#define VFP     30        // Vertical Front Porch
+#define VBP     12        // Vertical Back Porch
+#define VSA     4         // Vertical Sync Active
+
+Clock Frequency: 41.4 MHz
+Total H: 900 pixels (720 + 80 + 20 + 80)
+Total V: 766 lines  (720 + 30 + 4 + 12)
+
+
+INITIALIZATION SEQUENCE:
+================================================================================
+
+1. SETEXTC (0xB9) - Unlock Extended Commands
+--------------------------------------------------------------------------------
+DSI_CMD(0x04, 0xB9);      // Command: Set Extended Command
+    DSI_PA(0xF1);         // Parameter 1: Magic key
+    DSI_PA(0x12);         // Parameter 2: Magic key
+    DSI_PA(0x83);         // Parameter 3: Magic key
+// Purpose: Enable manufacturer-specific extended commands
+
+
+2. SETMIPI (0xBA) - Configure MIPI DSI Interface  
+--------------------------------------------------------------------------------
+DSI_CMD(0x1C, 0xBA);      // Command: Set MIPI DSI configuration
+    DSI_PA(0x33);         // 1:  Lane config (33=4Lane, 32=3Lane, 31=2Lane)
+    DSI_PA(0x81);         // 2:  DSI LDO & termination
+    DSI_PA(0x05);         // 3:  High-speed receiver config
+    DSI_PA(0xF9);         // 4:  TX clock selection
+    DSI_PA(0x0E);         // 5:  Min HFP in DSI mode
+    DSI_PA(0x0E);         // 6:  Min HBP in DSI mode
+    DSI_PA(0x20);         // 7:  
+    DSI_PA(0x00);         // 8:  
+    DSI_PA(0x00);         // 9:  
+    DSI_PA(0x00);         // 10: 
+    DSI_PA(0x00);         // 11: 
+    DSI_PA(0x00);         // 12: 
+    DSI_PA(0x00);         // 13: 
+    DSI_PA(0x00);         // 14: 
+    DSI_PA(0x44);         // 15: 
+    DSI_PA(0x25);         // 16: 
+    DSI_PA(0x00);         // 17: 
+    DSI_PA(0x90);         // 18: 
+    DSI_PA(0x0A);         // 19: 
+    DSI_PA(0x00);         // 20: 
+    DSI_PA(0x00);         // 21: 
+    DSI_PA(0x01);         // 22: 
+    DSI_PA(0x4F);         // 23: 
+    DSI_PA(0x01);         // 24: 
+    DSI_PA(0x00);         // 25: 
+    DSI_PA(0x00);         // 26: 
+    DSI_PA(0x37);         // 27: 
+
+
+3. SETPOWER_EXT (0xB8) - Extended Power Control
+--------------------------------------------------------------------------------
+DSI_CMD(0x05, 0xB8);      // Command: Set Extended Power Control (ECP)
+    DSI_PA(0x25);         // Power mode: 0x75=3-power, 0x25=Power IC mode
+    DSI_PA(0x22);         // 
+    DSI_PA(0xF0);         // 
+    DSI_PA(0x63);         // 
+
+
+4. UNKNOWN_BF (0xBF) - Proprietary Configuration
+--------------------------------------------------------------------------------
+DSI_CMD(0x04, 0xBF);      // Command: Set PCR (Power Control Register)
+    DSI_PA(0x02);         // 
+    DSI_PA(0x11);         // 
+    DSI_PA(0x00);         // 
+
+
+5. SETRGBIF (0xB3) - RGB Interface Configuration
+--------------------------------------------------------------------------------
+DSI_CMD(0x0B, 0xB3);      // Command: Set RGB Interface
+    DSI_PA(0x10);         // 1:  VBP_RGB_GEN
+    DSI_PA(0x10);         // 2:  VFP_RGB_GEN
+    DSI_PA(0x28);         // 3:  DE_BP_RGB_GEN (40 decimal)
+    DSI_PA(0x28);         // 4:  DE_FP_RGB_GEN (40 decimal)
+    DSI_PA(0x03);         // 5:  
+    DSI_PA(0xFF);         // 6:  
+    DSI_PA(0x00);         // 7:  
+    DSI_PA(0x00);         // 8:  
+    DSI_PA(0x00);         // 9:  
+    DSI_PA(0x00);         // 10: 
+
+
+6. SETSCR (0xC0) - Source Control Register
+--------------------------------------------------------------------------------
+DSI_CMD(0x0A, 0xC0);      // Command: Set Source Control Register (SCR)
+    DSI_PA(0x73);         // 1: 
+    DSI_PA(0x73);         // 2: 
+    DSI_PA(0x50);         // 3: 
+    DSI_PA(0x50);         // 4: 
+    DSI_PA(0x00);         // 5: 
+    DSI_PA(0x00);         // 6: 
+    DSI_PA(0x12);         // 7: 
+    DSI_PA(0x70);         // 8: 
+    DSI_PA(0x00);         // 9: 
+
+
+7. SETVDC (0xBC) - VDC Voltage Setting
+--------------------------------------------------------------------------------
+DSI_CMD(0x02, 0xBC);      // Command: Set VDC voltage
+    DSI_PA(0x46);         // VDC level (default: 0x46)
+
+
+8. SETPANEL (0xCC) - Panel Direction Control
+--------------------------------------------------------------------------------
+DSI_CMD(0x02, 0xCC);      // Command: Set Panel scan direction
+    DSI_PA(0x0B);         // Forward=0x0B, Backward=0x07
+
+
+9. SETCYC (0xB4) - Panel Inversion
+--------------------------------------------------------------------------------
+DSI_CMD(0x02, 0xB4);      // Command: Set Panel Inversion mode
+    DSI_PA(0x80);         // Inversion setting
+
+
+10. SETDISP (0xB2) - Display Resolution
+--------------------------------------------------------------------------------
+DSI_CMD(0x04, 0xB2);      // Command: Set RSO (Resolution Setting Option)
+    DSI_PA(0x3C);         // Resolution: 720x672
+    DSI_PA(0x12);         // 
+    DSI_PA(0x30);         // 
+
+
+11. SETEQ (0xE3) - EQ Timing Control
+--------------------------------------------------------------------------------
+DSI_CMD(0x0F, 0xE3);      // Command: Set EQ timing
+    DSI_PA(0x07);         // 1:  PNOEQ
+    DSI_PA(0x07);         // 2:  NNOEQ
+    DSI_PA(0x0B);         // 3:  PEQGND
+    DSI_PA(0x0B);         // 4:  NEQGND
+    DSI_PA(0x03);         // 5:  PEQVCI
+    DSI_PA(0x0B);         // 6:  NEQVCI
+    DSI_PA(0x00);         // 7:  PEQVCI1
+    DSI_PA(0x00);         // 8:  NEQVCI1
+    DSI_PA(0x00);         // 9:  VCOM_PULLGND_OFF
+    DSI_PA(0x00);         // 10: VCOM_PULLGND_OFF
+    DSI_PA(0xFF);         // 11: VCOM_IDLE_ON
+    DSI_PA(0x00);         // 12: EACH_OPON=0
+    DSI_PA(0xC0);         // 13: ESD detect function (default=0xC0)
+    DSI_PA(0x10);         // 14: SLPOTP
+
+
+12. SETPOWER (0xC1) - Main Power Control
+--------------------------------------------------------------------------------
+DSI_CMD(0x0D, 0xC1);      // Command: Set POWER control
+    DSI_PA(0x36);         // 1:  VBTHS VBTLS
+    DSI_PA(0x00);         // 2:  E3
+    DSI_PA(0x32);         // 3:  VSPR (positive supply)
+    DSI_PA(0x32);         // 4:  VSNR (negative supply)
+    DSI_PA(0x77);         // 5:  VSP VSN
+    DSI_PA(0xF1);         // 6:  APS
+    DSI_PA(0xCC);         // 7:  VGH1 VGL1
+    DSI_PA(0xCC);         // 8:  VGH1 VGL1
+    DSI_PA(0x77);         // 9:  VGH2 VGL2
+    DSI_PA(0x77);         // 10: VGH2 VGL2
+    DSI_PA(0x33);         // 11: VGH3 VGL3
+    DSI_PA(0x33);         // 12: VGH3 VGL3
+
+
+13. SETBGP (0xB5) - BGP Voltage
+--------------------------------------------------------------------------------
+DSI_CMD(0x03, 0xB5);      // Command: Set BGP (Band Gap) voltage
+    DSI_PA(0x0A);         // vref  (positive reference)
+    DSI_PA(0x0A);         // nvref (negative reference)
+
+
+14. SETVCOM (0xB6) - VCOM Voltage
+--------------------------------------------------------------------------------
+DSI_CMD(0x03, 0xB6);      // Command: Set VCOM voltage
+    DSI_PA(0xB2);         // Forward VCOM voltage
+    DSI_PA(0xB2);         // Backward VCOM voltage
+
+
+15. SETGIP1 (0xE9) - Gate In Panel Control 1
+--------------------------------------------------------------------------------
+DSI_CMD(0x40, 0xE9);      // Command: Set GIP timing (64 bytes)
+    DSI_PA(0xC8);         // 1:  PANSEL
+    DSI_PA(0x10);         // 2:  SHR_0[11:8]
+    DSI_PA(0x0A);         // 3:  SHR_0[7:0]
+    DSI_PA(0x10);         // 4:  SHR_1[11:8]
+    DSI_PA(0x0F);         // 5:  SHR_1[7:0] (0x4B,0x3F for GCH)
+    DSI_PA(0xA1);         // 6:  SPON[7:0]
+    DSI_PA(0x80);         // 7:  SPOFF[7:0]
+    DSI_PA(0x12);         // 8:  SHR0_1[3:0], SHR0_2[3:0]
+    DSI_PA(0x31);         // 9:  SHR0_3[3:0], SHR1_1[3:0]
+    DSI_PA(0x23);         // 10: SHR1_2[3:0], SHR1_3[3:0]
+    DSI_PA(0x47);         // 11: SHP[3:0], SCP[3:0]
+    DSI_PA(0x86);         // 12: CHR[7:0]
+    DSI_PA(0xA1);         // 13: CON[7:0]
+    DSI_PA(0x80);         // 14: COFF[7:0]
+    DSI_PA(0x47);         // 15: CHP[3:0], CCP[3:0]
+    DSI_PA(0x08);         // 16: USER_GIP_GATE[7:0]
+    DSI_PA(0x00);         // 17: CGTS_L[21:16]
+    DSI_PA(0x00);         // 18: CGTS_L[15:8]
+    DSI_PA(0x0D);         // 19: CGTS_L[7:0]
+    DSI_PA(0x00);         // 20: CGTS_INV_L[21:16]
+    DSI_PA(0x00);         // 21: CGTS_INV_L[15:8]
+    DSI_PA(0x00);         // 22: CGTS_INV_L[7:0]
+    DSI_PA(0x00);         // 23: CGTS_R[21:16]
+    DSI_PA(0x00);         // 24: CGTS_R[15:8]
+    DSI_PA(0x0D);         // 25: CGTS_R[7:0]
+    DSI_PA(0x00);         // 26: CGTS_INV_R[21:16]
+    DSI_PA(0x00);         // 27: CGTS_INV_R[15:8]
+    DSI_PA(0x00);         // 28: CGTS_INV_R[7:0]
+    DSI_PA(0x48);         // 29: COS1_L[3:0], COS2_L[3:0]  (STV0/VSD)
+    DSI_PA(0x02);         // 30: COS3_L[3:0], COS4_L[3:0]  (STV1/STV3)
+    DSI_PA(0x8B);         // 31: COS5_L[3:0], COS6_L[3:0]  (VGL/VDDE)
+    DSI_PA(0xAF);         // 32: COS7_L[3:0], COS8_L[3:0]  (VDDO/VDS)
+    DSI_PA(0x46);         // 33: COS9_L[3:0], COS10_L[3:0] (CLK1/CLK3)
+    DSI_PA(0x02);         // 34: COS11_L[3:0],COS12_L[3:0] (CLK5/CLK7)
+    DSI_PA(0x88);         // 35: COS13_L[3:0],COS14_L[3:0]
+    DSI_PA(0x88);         // 36: COS15_L[3:0],COS16_L[3:0]
+    DSI_PA(0x88);         // 37: COS17_L[3:0],COS18_L[3:0]
+    DSI_PA(0x88);         // 38: COS19_L[3:0],COS20_L[3:0]
+    DSI_PA(0x88);         // 39: COS21_L[3:0],COS22_L[3:0]
+    DSI_PA(0x48);         // 40: COS1_R[3:0], COS2_R[3:0]
+    DSI_PA(0x13);         // 41: COS3_R[3:0], COS4_R[3:0]
+    DSI_PA(0x8B);         // 42: COS5_R[3:0], COS6_R[3:0]
+    DSI_PA(0xAF);         // 43: COS7_R[3:0], COS8_R[3:0]
+    DSI_PA(0x57);         // 44: COS9_R[3:0], COS10_R[3:0]
+    DSI_PA(0x13);         // 45: COS11_R[3:0],COS12_R[3:0]
+    DSI_PA(0x88);         // 46: COS13_R[3:0],COS14_R[3:0]
+    DSI_PA(0x88);         // 47: COS15_R[3:0],COS16_R[3:0]
+    DSI_PA(0x88);         // 48: COS17_R[3:0],COS18_R[3:0]
+    DSI_PA(0x88);         // 49: COS19_R[3:0],COS20_R[3:0]
+    DSI_PA(0x88);         // 50: COS21_R[3:0],COS22_R[3:0]
+    DSI_PA(0x00);         // 51: TCONOPTION
+    DSI_PA(0x00);         // 52: OPTION
+    DSI_PA(0x00);         // 53: OTPION
+    DSI_PA(0x00);         // 54: OPTION
+    DSI_PA(0x00);         // 55: CHR2
+    DSI_PA(0x00);         // 56: CON2
+    DSI_PA(0x00);         // 57: COFF2
+    DSI_PA(0x00);         // 58: CHP2, CCP2
+    DSI_PA(0x00);         // 59: CKS[21:16]
+    DSI_PA(0x00);         // 60: CKS[15:8]
+    DSI_PA(0x00);         // 61: CKS[7:0]
+    DSI_PA(0x00);         // 62: COFF[7:6],CON[5:4],SPOFF[3:2],SPON[1:0]
+    DSI_PA(0x00);         // 63: COFF2[7:6],CON2[5:4]
+
+
+16. SETGIP2 (0xEA) - Gate In Panel Control 2
+--------------------------------------------------------------------------------
+DSI_CMD(0x3E, 0xEA);      // Command: Set GIP2 timing (62 bytes)
+    DSI_PA(0x96);         // 1:  ys2_sel[1:0]
+    DSI_PA(0x12);         // 2:  user_gip_gate1[7:0]
+    DSI_PA(0x01);         // 3:  ck_all_on_width1[5:0]
+    DSI_PA(0x01);         // 4:  ck_all_on_width2[5:0]
+    DSI_PA(0x01);         // 5:  ck_all_on_width3[5:0]
+    DSI_PA(0x78);         // 6:  ys_flag_period[7:0]
+    DSI_PA(0x02);         // 7:  ys_2
+    DSI_PA(0x00);         // 8:  user_gip_gate1_2[7:0]
+    DSI_PA(0x00);         // 9:  ck_all_on_width1_2[5:0]
+    DSI_PA(0x00);         // 10: ck_all_on_width2_2[5:0]
+    DSI_PA(0x00);         // 11: ck_all_on_width3_2[5:0]
+    DSI_PA(0x00);         // 12: ys_flag_period_2[7:0]
+    DSI_PA(0x4F);         // 13: COS1_L[3:0], COS2_L[3:0]  (X/X)
+    DSI_PA(0x31);         // 14: COS3_L[3:0], COS4_L[3:0]  (X/X)
+    DSI_PA(0x8B);         // 15: COS5_L[3:0], COS6_L[3:0]  (CLK3/CLK3)
+    DSI_PA(0xA8);         // 16: COS7_L[3:0], COS8_L[3:0]  (CLK1/CLK1)
+    DSI_PA(0x31);         // 17: COS9_L[3:0], COS10_L[3:0] (CLK7/CLK7)
+    DSI_PA(0x75);         // 18: COS11_L[3:0],COS12_L[3:0] (CLK5/CLK5)
+    DSI_PA(0x88);         // 19: COS13_L[3:0],COS14_L[3:0] (VGL/VGL)
+    DSI_PA(0x88);         // 20: COS15_L[3:0],COS16_L[3:0] (STV1/VSD)
+    DSI_PA(0x88);         // 21: COS17_L[3:0],COS18_L[3:0] (VDS/STV3)
+    DSI_PA(0x88);         // 22: COS19_L[3:0],COS20_L[3:0] (GCH/GCL)
+    DSI_PA(0x88);         // 23: COS21_L[3:0],COS22_L[3:0] (XXX/XXX)
+    DSI_PA(0x4F);         // 24: COS1_R[3:0], COS2_R[3:0]  (X/X)
+    DSI_PA(0x20);         // 25: COS3_R[3:0], COS4_R[3:0]  (X/X)
+    DSI_PA(0x8B);         // 26: COS5_R[3:0], COS6_R[3:0]  (CLK4/CLK4)
+    DSI_PA(0xA8);         // 27: COS7_R[3:0], COS8_R[3:0]  (CLK2/CLK2)
+    DSI_PA(0x20);         // 28: COS9_R[3:0], COS10_R[3:0] (CLK8/CLK8)
+    DSI_PA(0x64);         // 29: COS11_R[3:0],COS12_R[3:0] (CLK6/CLK6)
+    DSI_PA(0x88);         // 30: COS13_R[3:0],COS14_R[3:0] (VGL/VGL)
+    DSI_PA(0x88);         // 31: COS15_R[3:0],COS16_R[3:0] (STV2/VSD)
+    DSI_PA(0x88);         // 32: COS17_R[3:0],COS18_R[3:0] (VDS/STV4)
+    DSI_PA(0x88);         // 33: COS19_R[3:0],COS20_R[3:0] (GCH/GCL)
+    DSI_PA(0x88);         // 34: COS21_R[3:0],COS22_R[3:0] (XXX/XXX)
+    DSI_PA(0x23);         // 35: EQOPT, EQ_SEL
+    DSI_PA(0x00);         // 36: EQ_DELAY[7:0]
+    DSI_PA(0x00);         // 37: EQ_DELAY_HSYNC[3:0]
+    DSI_PA(0x01);         // 38: HSYNC_TO_CL1_CNT9[8]
+    DSI_PA(0x02);         // 39: HSYNC_TO_CL1_CNT9[7:0]
+    DSI_PA(0x00);         // 40: HIZ_L
+    DSI_PA(0x00);         // 41: HIZ_R
+    DSI_PA(0x00);         // 42: CKS_GS[21:16]
+    DSI_PA(0x00);         // 43: CKS_GS[15:8]
+    DSI_PA(0x00);         // 44: CKS_GS[7:0]
+    DSI_PA(0x00);         // 45: CK_MSB_EN[21:16]
+    DSI_PA(0x00);         // 46: CK_MSB_EN[15:8]
+    DSI_PA(0x00);         // 47: CK_MSB_EN[7:0]
+    DSI_PA(0x00);         // 48: CK_MSB_EN_GS[21:16]
+    DSI_PA(0x00);         // 49: CK_MSB_EN_GS[15:8]
+    DSI_PA(0x00);         // 50: CK_MSB_EN_GS[7:0]
+    DSI_PA(0x00);         // 51: SHR2[11:8]
+    DSI_PA(0x00);         // 52: SHR2[7:0]
+    DSI_PA(0x00);         // 53: SHR2_1[3:0], SHR2_2
+    DSI_PA(0x00);         // 54: SHR2_3[3:0]
+    DSI_PA(0x40);         // 55: SHP1[3:0]
+    DSI_PA(0xA1);         // 56: SPON1[7:0]
+    DSI_PA(0x80);         // 57: SPOFF1[7:0]
+    DSI_PA(0x00);         // 58: SHP2[3:0]
+    DSI_PA(0x00);         // 59: SPON2[7:0]
+    DSI_PA(0x00);         // 60: SPOFF2[7:0]
+    DSI_PA(0x00);         // 61: SPOFF2[9:8]/SPON2[9:8]/SPOFF1[9:8]/SPON1[9:8]
+
+
+17. SETGAMMA (0xE0) - Gamma Correction
+--------------------------------------------------------------------------------
+DSI_CMD(0x23, 0xE0);      // Command: Set Gamma (35 bytes)
+    // Positive Gamma (17 values):
+    DSI_PA(0x00);         // 1:  V0
+    DSI_PA(0x0A);         // 2:  V1
+    DSI_PA(0x0F);         // 3:  V2
+    DSI_PA(0x29);         // 4:  V4
+    DSI_PA(0x3B);         // 5:  V6
+    DSI_PA(0x3F);         // 6:  V13
+    DSI_PA(0x42);         // 7:  V20
+    DSI_PA(0x39);         // 8:  V36
+    DSI_PA(0x06);         // 9:  V43
+    DSI_PA(0x0D);         // 10: V50
+    DSI_PA(0x10);         // 11: V57
+    DSI_PA(0x13);         // 12: V59
+    DSI_PA(0x15);         // 13: V61
+    DSI_PA(0x14);         // 14: V62
+    DSI_PA(0x15);         // 15: V63
+    DSI_PA(0x10);         // 16: V127
+    DSI_PA(0x17);         // 17: V255
+    // Negative Gamma (17 values - same as positive):
+    DSI_PA(0x00);         // 18: V0
+    DSI_PA(0x0A);         // 19: V1
+    DSI_PA(0x0F);         // 20: V2
+    DSI_PA(0x29);         // 21: V4
+    DSI_PA(0x3B);         // 22: V6
+    DSI_PA(0x3F);         // 23: V13
+    DSI_PA(0x42);         // 24: V20
+    DSI_PA(0x39);         // 25: V36
+    DSI_PA(0x06);         // 26: V43
+    DSI_PA(0x0D);         // 27: V50
+    DSI_PA(0x10);         // 28: V57
+    DSI_PA(0x13);         // 29: V59
+    DSI_PA(0x15);         // 30: V61
+    DSI_PA(0x14);         // 31: V62
+    DSI_PA(0x15);         // 32: V63
+    DSI_PA(0x10);         // 33: V127
+    DSI_PA(0x17);         // 34: V255
+
+
+18. Exit Sleep Mode (0x11)
+--------------------------------------------------------------------------------
+DSI_CMD(0x01, 0x11);      // Command: Sleep Out
+DelayX1ms(250);           // Wait 250ms for panel to wake up
+
+
+19. Display On (0x29)
+--------------------------------------------------------------------------------
+DSI_CMD(0x01, 0x29);      // Command: Display On
+DelayX1ms(50);            // Wait 50ms for display stabilization
+
+
+================================================================================
+END OF INITIALIZATION SEQUENCE
+================================================================================
+
+NOTES:
+- DSI_CMD(length, command): Specifies command byte and total parameter count
+- DSI_PA(value): Single parameter byte
+- All values in hexadecimal
+- Timing delays are critical for proper operation
+- See kernel driver panel-sitronix-st7703-gx040hd.c for implementation

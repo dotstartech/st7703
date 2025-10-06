@@ -1,158 +1,150 @@
-we are working on the st7703 display support for raspberry pi cm4
+# ST7703 Driver for GX040HD-30MB-A1 LCD Panel
 
-here is semi working device tree object
+This repository provides a Linux kernel module and device tree overlay for integrating the ``GX040HD-30MB-A1`` 4.0" 720x720 IPS LCD panel, featuring the Sitronix ``ST7703`` controller, with the Raspberry Pi Compute Module 4 (CM4). It enables direct connection of the panel to the Pi’s ``MIPI DSI`` interface, supporting 4-lane operation and full RGB888 color. The driver implements the complete initialization and configuration sequence from the vendor, including power management, timing parameters, and gamma correction, ensuring reliable operation and optimal display quality.
 
-```
-/dts-v1/;
-/plugin/;
+The repository includes build scripts, installation instructions, and troubleshooting guidance for seamless deployment on Raspberry Pi OS with kernel version ``6.12.25.25+rpt-rpi-v8`` or compatible. This project is intended for developers, integrators, and hardware enthusiasts seeking to add high-resolution square LCD support to custom Raspberry Pi-based systems.
 
-&{/} {
-    fragment@0 {
-        target-path = "/"; /* or use a valid parent node path in your base DT */
-        overlay {
-            panel {
-                compatible = "sitronix,st7703";
+## Panel Specifications
 
-                reset-gpios = <&gpio 23 0>;
+- **Model**: GX040HD-30MB-A1
+- **Controller**: Sitronix ST7703
+- **Size**: 4.0 inch diagonal
+- **Resolution**: 720 x 720 pixels
+- **Type**: IPS LCD
+- **Interface**: MIPI DSI 4-lane
+- **Pixel clock**: 41.4 MHz
+- **Active area**: 89.6 x 89.6 mm
 
-                data-lanes = <0 1 2 3>;
-                bus-format = "rgb888";
-                default-bits-per-pixel = <24>;
-                status = "okay";
+## Display Timing Parameters
 
-                display-timings {
-                    native-mode = <&mode0>;
-                    mode0: mode0 {
-                        clock-frequency = <72000000>;
-                        hactive = <720>;
-                        vactive = <720>;
-                        hsync-len = <10>;
-                        hfront-porch = <20>;
-                        hback-porch = <20>;
-                        vsync-len = <2>;
-                        vfront-porch = <10>;
-                        vback-porch = <10>;
-                        refresh = <60>;
-                    };
-                };
-            };
-        };
-    };
-};
-```
+Based on the initialization sequence from vendor documentation:
+- **HFP (Horizontal Front Porch)**: 80 pixels
+- **HSA (Horizontal Sync Active)**: 20 pixels  
+- **HBP (Horizontal Back Porch)**: 80 pixels
+- **VFP (Vertical Front Porch)**: 30 lines
+- **VSA (Vertical Sync Active)**: 4 lines
+- **VBP (Vertical Back Porch)**: 12 lines
 
-here is how to compile it
-```
-sudo dtc -@ -I dts -O dtb -o st7703.dtbo st7703-overlay.dts
-```
+## Hardware Setup
 
-Here is a command how to copy new overlay file to the boot
-```
-sudo cp st7703.dtbo /boot/firmware/overlays/
-```
+### GPIO Connections
+- **Reset GPIO**: GPIO 23 (configurable in device tree)
+- **Power supplies**: VCC: 3.3V (main power) and IOVCC: 3.3V (I/O power)
 
-Here is the command to mount cm4 emmc
-```
- sudo ./rpiboot -d mass-storage-gadget64
-```
+### DSI Configuration
+- **Interface**: DSI0 on Raspberry Pi (configurable in device tree)
+- **Lanes**: 4 lanes (data lanes 0, 1, 2, 3)
+- **Format**: RGB888 (24-bit color)
 
-## Working Solution
+## Build and Installation
 
-### 1. Build and install ST7703 panel driver (out-of-tree)
 ```bash
-sudo bash scripts/build_st7703_module.sh
+# Build the kernel module
+make all
+
+# Install the kernel module
+make install
+
+# Build and install device tree overlay
+make overlay
+
+# Load the module
+make load
 ```
 
-### 2. Create working overlay
-The overlay must be structured correctly to avoid device tree conflicts. Use this working version:
-
-```dts
-/dts-v1/;
-/plugin/;
-
-/ {
-    compatible = "brcm,bcm2711";
-};
-
-&dsi0 {
-    status = "okay";
-    #address-cells = <1>;
-    #size-cells = <0>;
-    
-    port {
-        endpoint {
-            data-lanes = <0 1 2 3>;
-        };
-    };
-    
-    panel@0 {
-        compatible = "xingbangda,xbd599", "sitronix,st7703";
-        reg = <0>;
-        reset-gpios = <&gpio 23 1>;
-        
-        port {
-            endpoint {
-                data-lanes = <0 1 2 3>;
-            };
-        };
-        
-        display-timings {
-            timing0 {
-                clock-frequency = <41400000>;
-                hactive = <720>;
-                vactive = <720>;
-                hsync-len = <20>;
-                hfront-porch = <80>;
-                hback-porch = <80>;
-                vsync-len = <4>;
-                vfront-porch = <30>;
-                vback-porch = <12>;
-            };
-        };
-    };
-};
-```
-
-### 3. Compile and install overlay
 ```bash
-sudo dtc -@ -I dts -O dtb -o st7703.dtbo st7703-overlay.dts
-sudo cp st7703.dtbo /boot/firmware/overlays/
+# Compile overlay
+sudo dtc -@ -I dts -O dtb -o st7703-gx040hd.dtbo st7703-gx040hd-overlay.dts
+sudo cp st7703-gx040hd.dtbo /boot/firmware/overlays/
+
+# Test with new overlay
+sudo dtoverlay -r st7703-gx040hd
+sudo dtoverlay st7703-gx040hd
 ```
 
-### 4. Configure system
-Ensure `/boot/firmware/config.txt` contains:
+### Reboot and Check
+```bash
+sudo reboot
+dmesg | grep -i st7703
+dmesg | grep -i dsi
+dmesg | grep -i panel
+```
+
+After successful setup, you should see:
+```
+vc4-drm gpu: bound fe204000.dsi (ops vc4_dsi_ops [vc4])
+vc4-drm gpu: bound fe700000.dsi (ops vc4_dsi_ops [vc4])
+sitronix,st7703: panel found
+vc4-drm gpu: [drm] Initialized vc4 0.0.0 for gpu on minor 1
+```
+
+## Configuration
+
+Add to `/boot/firmware/config.txt`:
 ```
 display_auto_detect=0
 dtoverlay=vc4-kms-v3d
-dtoverlay=st7703
+dtoverlay=st7703-gx040hd
 ```
 
-### 5. Apply overlay and test
+To load overlay manually run
 ```bash
-sudo dtoverlay st7703
-sudo dtoverlay -l
-dmesg | grep -i -e dsi -e st7703 -e panel -e vc4
-modetest -M vc4
+sudo dtoverlay st7703-gx040hd
 ```
 
-## Troubleshooting Notes
+## Verification
 
-- **Driver compatibility**: Use `"xingbangda,xbd599", "sitronix,st7703"` compatible strings
-- **GPIO flags**: Try `reset-gpios = <&gpio 23 1>` (active low) or `reset-gpios = <&gpio 23 0>` (active high)
-- **Display timings**: Based on panel spec: 720x720, ~41.4MHz, HSA=20, HFP=80, HBP=80, VSA=4, VFP=30, VBP=12
-- **Power supply**: Fix undervoltage warnings before testing
-- **Cross-compilation**: Use `TARGET_KVER=6.12.25+rpt-rpi-v8` on Pi 5 to build for CM4
+Check if the module loaded correctly
+```bash
+dmesg | grep -i st7703
+modinfo panel-sitronix-st7703
+```
 
+Verify display detection
+```bash
+# Check if display is detected
+modetest -M vc4
 
+# List available displays
+fbset -s
 
-# Copy directly Pi5 → CM4
-scp -3 admin@10.0.0.50:/tmp/st7703_build/st7703-6.12.25+rpt-rpi-v8.tgz \
-    admin@10.0.0.24:/tmp/st7703-6.12.25+rpt-rpi-v8.tgz
+# Check DRM/KMS status
+sudo dtoverlay -l
+```
 
-# Install on CM4
-ssh admin@10.0.0.24 'sudo tar -C / -xzf /tmp/st7703-6.12.25+rpt-rpi-v8.tgz && sudo depmod -a 6.12.25+rpt-rpi-v8'
-ssh admin@10.0.0.24 'sudo modprobe panel-sitronix-st7703 || true'
+## Troubleshooting
 
-# Verify and reboot if needed
-ssh admin@10.0.0.24 'modinfo panel-sitronix-st7703; ls /boot/firmware/overlays/st7703.dtbo'
-ssh admin@10.0.0.24 'sudo reboot'
+```bash
+# Enable debug output
+echo 8 > /sys/module/drm/parameters/debug
+
+# Check display controller status  
+cat /sys/kernel/debug/dri/0/state
+
+# Monitor DSI interface
+dmesg | grep -i dsi
+
+# Check panel power state
+cat /sys/class/drm/card0-DSI-1/status
+
+# Check DSI interface
+ls /dev/dri/
+
+# Check framebuffer
+ls /dev/fb*
+
+# Monitor kernel messages
+dmesg -w | grep -E "(st7703|dsi|panel|vc4)"
+```
+
+## License
+
+This driver is based on the upstream Linux kernel ST7703 panel driver and is licensed under GPL v2.
+
+# References
+
+- [ST7703 Datasheet](docs/ST7703_DS_v01_20160128.pdf)
+- [GX040HD Panel Specification](docs/GX040HD-30MB-A1.pdf)
+- [Initialization Sequence](docs/ST7703_QV040YNQ-N80_IPS_code_2power_4Lane_V1.0_20250611.txt)
+- [Raspberry Pi Linux ST7703 Driver Source](https://github.com/raspberrypi/linux/blob/rpi-6.6.y/drivers/gpu/drm/panel/panel-sitronix-st7703.c)
+- [Linux DRM Panel Documentation](https://www.kernel.org/doc/html/latest/gpu/drm-kms-helpers.html#panel-helper-reference)
