@@ -4,7 +4,7 @@ KERNEL_VERSION ?= $(shell uname -r)
 KERNEL_DIR ?= /lib/modules/$(KERNEL_VERSION)/build
 PWD := $(shell pwd)
 
-obj-m := panel-sitronix-st7703.o
+obj-m := panel-sitronix-st7703-gx040hd.o
 
 all:
 	$(MAKE) -C $(KERNEL_DIR) M=$(PWD) modules
