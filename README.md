@@ -2,7 +2,7 @@
 
 This repository provides a Linux kernel module and device tree overlays for integrating the ``GX040HD-30MB-A1`` 4.0" 720x720 IPS LCD panel, featuring the Sitronix ``ST7703`` LCD controller and FocalTech ``FT6336U`` touch controller, with the Raspberry Pi Compute Module 4 (CM4). It enables direct connection of the panel to the Pi’s ``MIPI DSI`` interface, supporting 4-lane operation and full RGB888 color. The LCD panel driver is based on the upstream Linux kernel ST7703 panel driver.
 
-The repository includes build and installation instructions, and troubleshooting guidance for seamless deployment on Raspberry Pi OS with kernel version ``6.12.25.25+rpt-rpi-v8`` or compatible. This project is intended for developers, integrators, and hardware enthusiasts seeking to add high-resolution square LCD support to custom Raspberry Pi-based systems.
+The repository includes build and installation instructions, and troubleshooting guidance for seamless deployment on Raspberry Pi OS with kernel version ``6.12.25+rpt-rpi-v8`` or compatible. This project is intended for developers, integrators, and hardware enthusiasts seeking to add high-resolution square LCD support to custom Raspberry Pi-based systems.
 
 **References:**
 - [ST7703 Datasheet](docs/ST7703_DS_v01_20160128.pdf)
