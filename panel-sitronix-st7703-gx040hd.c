@@ -528,11 +528,12 @@ static int st7703_probe(struct mipi_dsi_device *dsi)
 	struct st7703 *ctx;
 	int ret;
 
-	ctx = devm_drm_panel_alloc(dev, struct st7703, panel,
-				   &st7703_drm_funcs,
-				   DRM_MODE_CONNECTOR_DSI);
-	if (IS_ERR(ctx))
-		return PTR_ERR(ctx);
+	ctx = devm_kzalloc(dev, sizeof(*ctx), GFP_KERNEL);
+	if (!ctx)
+		return -ENOMEM;
+	
+	drm_panel_init(&ctx->panel, dev, &st7703_drm_funcs,
+		       DRM_MODE_CONNECTOR_DSI);
 
 	ctx->reset_gpio = devm_gpiod_get(dev, "reset", GPIOD_OUT_LOW);
 	if (IS_ERR(ctx->reset_gpio))

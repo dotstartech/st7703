@@ -1,0 +1,53 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+    compatible = "brcm,bcm2835",
+                 "brcm,bcm2708",
+                 "brcm,bcm2709",
+                 "brcm,bcm2710",
+                 "brcm,bcm2711";
+
+    fragment@0 {
+        target = <&i2c1>;
+        __overlay__ {
+            status = "okay";
+        };
+    };
+
+    fragment@1 {
+        target = <&gpio>;
+        __overlay__ {
+            ft5x06_pins: ft5x06_pins {
+                brcm,pins = <25 24>;
+                brcm,function = <0 0>;    /* 0 = INPUT */
+                brcm,pull = <2 2>;        /* 2 = PULL_UP */
+            };
+        };
+    };
+
+    fragment@2 {
+        target = <&i2c1>;
+        __overlay__ {
+            #address-cells = <1>;
+            #size-cells    = <0>;
+
+            /* FT6336U Touchcontroller */
+            ft6336u: touchscreen@48 {
+                compatible = "focaltech,ft6236";
+                reg = <0x48>;
+                pinctrl-names = "default";
+                pinctrl-0 = <&ft5x06_pins>;
+
+                interrupt-parent = <&gpio>;
+                interrupts = <25 0x2>;      /* BCM GPIO 25, IRQ_TYPE_EDGE_FALLING (0x2) */
+                reset-gpios = <&gpio 24 1>; /* BCM GPIO 24, active-low */
+
+                touchscreen-size-x = <720>;
+                touchscreen-size-y = <720>;
+                #touchscreen-inverted-x;     /* May need adjustment based on orientation */
+                #touchscreen-inverted-y;     /* May need adjustment based on orientation */
+            };
+        };
+    };
+};
