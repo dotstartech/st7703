@@ -2,7 +2,7 @@
 
 This repository provides a Linux kernel module and device tree overlays for integrating the ``GX040HD-30MB-A1`` (or similar ``TL040HDS21CT2-B1503A``) 4.0" 720x720 IPS LCD panel with the Raspberry Pi Compute Module 4 (CM4). The ``GX040HD-30MB-A1`` IPS LCD panel features the Sitronix ``ST7703`` LCD controller and the FocalTech ``FT6336U`` touch controller. It enables direct connection of the panel to the Pi’s ``MIPI DSI`` interface, supporting 4-lane operation and full RGB888 color. The LCD panel driver is based on the [upstream Linux kernel module ST7703](https://github.com/raspberrypi/linux/blob/rpi-6.6.y/drivers/gpu/drm/panel/panel-sitronix-st7703.c).
 
-Below are a few source where the panel can be purchased:
+Below are a few sources where the LCD panel can be purchased:
  - https://chance-display.com/product/4-inch-720720-mipi-interface-touch-screen-square-ips-tft-lcd-module
  - https://www.panelook.com/GX040HD-30MRB-A1HDMI-board-4-inch-Square-display-screen-30PINS-MIPI-720-720-IPS-HDMI-board-with-detail_181668.html
 
